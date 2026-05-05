@@ -1,0 +1,70 @@
+services:
+  # --- PostgreSQL Database ---
+  db:
+    image: postgres:16-alpine
+    container_name: aiplatform-db
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- MCP Server (FastMCP) ---
+  mcp-server:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+    container_name: aiplatform-mcp
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8001:8001"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - SERPAPI_API_KEY=${SERPAPI_API_KEY}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+
+  # --- FastAPI Backend ---
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aiplatform-backend
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      mcp-server:
+        condition: service_started
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - MCP_SERVER_URL=${MCP_SERVER_URL}
+
+  # --- React Frontend ---
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: aiplatform-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

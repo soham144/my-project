@@ -1,0 +1,54 @@
+/* ====================================
+   Thinking Animation Styles
+   ==================================== */
+
+.thinking {
+  display: flex;
+  gap: var(--space-3);
+  max-width: var(--chat-max-width);
+  width: 100%;
+  margin: var(--space-2) auto;
+  padding: 0 var(--space-4);
+}
+
+.thinking__avatar {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-accent-soft);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  color: var(--accent-purple);
+  flex-shrink: 0;
+}
+
+.thinking__content {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-5);
+  background: var(--bg-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+.thinking__dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.thinking__dot {
+  width: 7px;
+  height: 7px;
+  background: var(--accent-purple);
+  border-radius: 50%;
+  animation: dotBounce 1.4s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+.thinking__dot:nth-child(1) { animation-delay: 0s; }
+.thinking__dot:nth-child(2) { animation-delay: 0.2s; }
+.thinking__dot:nth-child(3) { animation-delay: 0.4s; }
