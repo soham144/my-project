@@ -193,7 +193,9 @@ async def send_message_stream(
                 }
 
         # Save the assistant message to DB
-        async with get_db_session() as save_db:
+        from app.database import async_session_factory
+
+        async with async_session_factory() as save_db:
             assistant_msg = Message(
                 conversation_id=conversation.id,
                 role="assistant",
@@ -210,18 +212,3 @@ async def send_message_stream(
         }
 
     return EventSourceResponse(event_generator())
-
-
-async def get_db_session():
-    """Helper to get a new DB session for saving after streaming."""
-    from app.database import async_session_factory
-
-    class SessionContext:
-        async def __aenter__(self):
-            self.session = async_session_factory()
-            return self.session
-
-        async def __aexit__(self, exc_type, exc_val, exc_tb):
-            await self.session.close()
-
-    return SessionContext()
